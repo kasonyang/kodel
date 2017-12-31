@@ -39,6 +39,14 @@ public abstract class ScriptExecutor extends Script {
     }
   }
 
+  /**
+   * create a new template task
+   * @param model the data for rendering
+   * @param tplName the name of the template to render
+   * @param destination the destination of the rendering result
+   * @param engine which template engine to use
+   * @return the task created
+   */
   public TemplateTask template(Map<String,Object> model, String tplName, String destination,String engine) {
     String destFile = outputDir + "/" + this.destination + "/" + destination;
     if(engine==null || engine.isEmpty()){
@@ -49,10 +57,17 @@ public abstract class ScriptExecutor extends Script {
     return task;
   }
   
+  /**
+   * As same as invoking template(model,tplName,destination,null) 
+   */
   public TemplateTask template(Map<String,Object> model, String tplName, String destination){
     return template(model,tplName,destination,null);
   }
 
+  /**
+   * specify the directory to find the template
+   * @param dir the directory for template searching
+   */
   public void templateSource(String dir) {
     this.templateSource = dir.endsWith("/") ? dir.substring(0, dir.length() - 1) : dir;
   }
@@ -65,6 +80,10 @@ public abstract class ScriptExecutor extends Script {
     this.destination = dest;
   }
 
+  /**
+   * specify the output directory
+   * @param outDir 
+   */
   public void outputDir(String outDir) {
     this.outputDir = outDir;
   }
@@ -73,6 +92,11 @@ public abstract class ScriptExecutor extends Script {
     return templatePaths;
   }
 
+  /**
+   * add a new global variable which could be used in every template
+   * @param name the name of the global variable
+   * @param value the value of the global variable
+   */
   public void global(String name, Object value) {
     this.global.put(name, value);
   }
