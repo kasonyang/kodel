@@ -35,3 +35,6 @@ After step3,a file named `World.java` will be generated in directory `build`.
 * [handlebars](https://jknack.github.io/handlebars.java) : `.hbs`
 * [pebble](https://github.com/PebbleTemplates/pebble) : `.pbl`
 
+# build-in functions
+
+All build-in functions could be found in the [ScriptExecutor](http://kason.site/projects/kodel/javadoc/site/kason/kodel/ScriptExecutor.html#method.summary) class.
