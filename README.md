@@ -2,6 +2,11 @@
 
 Kodel is a text file generator.
 
+# Installation
+
+1. Download the [latest release](https://github.com/kasonyang/kodel/releases) and unpack it.
+2. Add the absolute path of the `bin` directory to the `PATH` environment variable.
+
 # Usage
 
 ## step1:define a template(using [tempera](http://kason.site/projects/tempera) engine):`templates/hello.tpr`
