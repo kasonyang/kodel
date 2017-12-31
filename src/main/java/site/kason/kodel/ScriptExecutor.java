@@ -20,10 +20,6 @@ public abstract class ScriptExecutor extends Script {
 
   private Map currentModel;
 
-  private String templateSource = "";
-
-  private String destination = ".";
-
   private String outputDir = ".";
 
   public final List<TemplateTask> tasks = new LinkedList();
@@ -40,67 +36,72 @@ public abstract class ScriptExecutor extends Script {
   }
 
   /**
-   * create a new template task
+   * Create a new template task
+   *
    * @param model the data for rendering
-   * @param tplName the name of the template to render
+   * @param templateName the name of the template to render
    * @param destination the destination of the rendering result
    * @param engine which template engine to use
    * @return the task created
    */
-  public TemplateTask template(Map<String,Object> model, String tplName, String destination,String engine) {
-    String destFile = outputDir + "/" + this.destination + "/" + destination;
-    if(engine==null || engine.isEmpty()){
-      engine = this.detectEngine(tplName);
+  public TemplateTask template(Map<String, Object> model, String templateName, String destination, String engine) {
+    String destFile = outputDir + "/" + destination;
+    if (engine == null || engine.isEmpty()) {
+      engine = this.detectEngine(templateName);
     }
-    TemplateTask task = new TemplateTask(model, templateSource + "/" + tplName, destFile,engine);
+    TemplateTask task = new TemplateTask(model, templateName, destFile, engine);
     tasks.add(task);
     return task;
   }
-  
+
   /**
-   * As same as invoking template(model,tplName,destination,null) 
+   * As same as invoking template(model,tplName,destination,null)
+   * 
+   * @param model
+   * @param templateName
+   * @param destination
+   * @return 
    */
-  public TemplateTask template(Map<String,Object> model, String tplName, String destination){
-    return template(model,tplName,destination,null);
+  public TemplateTask template(Map<String, Object> model, String templateName, String destination) {
+    return template(model, templateName, destination, null);
   }
 
   /**
-   * specify the directory to find the template
-   * @param dir the directory for template searching
+   * Add a directory for finding templates
+   *
+   * @param path the directory for template searching
    */
-  public void templateSource(String dir) {
-    this.templateSource = dir.endsWith("/") ? dir.substring(0, dir.length() - 1) : dir;
-  }
-
   public void addTemplatePath(String path) {
     this.templatePaths.add(0, path);
   }
 
-  public void destination(String dest) {
-    this.destination = dest;
-  }
-
   /**
-   * specify the output directory
-   * @param outDir 
+   * Specify the directory for output
+   *
+   * @param outDir the new directory
    */
   public void outputDir(String outDir) {
     this.outputDir = outDir;
   }
 
+  /**
+   * Get the template paths
+   * @return the template paths
+   */
   public List<String> getTemplatePaths() {
     return templatePaths;
   }
 
   /**
-   * add a new global variable which could be used in every template
+   * Add a new global variable which could be used in every template
+   *
    * @param name the name of the global variable
    * @param value the value of the global variable
    */
   public void global(String name, Object value) {
     this.global.put(name, value);
   }
-  
+
   private String detectEngine(String tplName) {
     String tplExt = FilenameUtils.getExtension(tplName);
     switch (tplExt) {
