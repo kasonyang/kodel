@@ -24,18 +24,16 @@ import org.codehaus.groovy.control.CompilerConfiguration;
  */
 public class App {
 
-  private final static String SYNTAX = "kodel [options] model template destination";
+  private final static String SYNTAX = "kodel [options] [BUILDFILE]";
 
   private final static Options OPTIONS;
 
   static {
     OPTIONS = new Options();
-    OPTIONS.addOption("h", false, "show this help message")
-            .addOption("overwrite", false, "overwrite if destination exists")
-            .addOption("collect", false, "render all models in one file")
-            .addOption("cp", true, "specifies class path")
-            .addOption("tp", true, "specifies template path")
-            .addOption("o", true, "specifies output directory");
+    OPTIONS.addOption("h","help", false, "show this help message")
+            .addOption(null,"classpath", true, "specifies class path")
+            .addOption(null,"templatepath", true, "specifies template path")
+            .addOption("o","out", true, "specifies output directory");
   }
 
   public static void printUsage() {
@@ -56,17 +54,13 @@ public class App {
   public static void main(String[] args) throws ParseException, CompilationFailedException, IOException, TemplateException {
     DefaultParser parser = new DefaultParser();
     CommandLine cli = parser.parse(OPTIONS, args);
-    if (cli.hasOption("h")) {
+    if (cli.hasOption("help")) {
       printUsage();
       return;
     }
     String cliArgs[] = cli.getArgs();
-    if (cliArgs.length == 0) {
-      printUsage();
-      return;
-    }
-    File modelFile = new File(cliArgs[0]);
-    String cp = cli.getOptionValue("cp", new File(modelFile.getParent(), "classes").getAbsolutePath());
+    File modelFile = new File(cliArgs.length>0 ? cliArgs[0] : "build.kodel");
+    String cp = cli.getOptionValue("classpath", new File(modelFile.getParent(), "classes").getAbsolutePath());
     URLClassLoader classLoader = new URLClassLoader(
             new URL[]{new File(cp).toURL()}, App.class.getClassLoader()
     );
@@ -80,10 +74,10 @@ public class App {
     config.setScriptBaseClass(ScriptExecutor.class.getName());
     GroovyShell shell = new GroovyShell(classLoader, new Binding(), config);
     ScriptExecutor script = (ScriptExecutor) shell.parse(modelFile);
-    String outputDir = cli.getOptionValue("o", ".");
+    String outputDir = cli.getOptionValue("out", ".");
     script.outputDir(outputDir);
     String homeTemplatePath = new File(appHome, "templates").getAbsolutePath();
-    String tp = cli.getOptionValue("tp", "templates");
+    String tp = cli.getOptionValue("templatepath", "templates");
     script.addTemplatePath(homeTemplatePath);
     script.addTemplatePath(tp);
     script.run();
