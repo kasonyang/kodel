@@ -28,7 +28,7 @@ public class App {
     
     private final static String APP_NAME = "kodel";
 
-    private final static String SYNTAX = "kodel [options] [BUILDFILE]";
+    private final static String SYNTAX = "kodel [options] BUILD_FILE";
 
     private final static Options OPTIONS;
 
@@ -64,7 +64,11 @@ public class App {
             return;
         }
         String cliArgs[] = cli.getArgs();
-        File modelFile = new File(cliArgs.length > 0 ? cliArgs[0] : "build.kodel");
+        if (cliArgs.length <=0 ){
+            printUsage();
+            System.exit(-1);
+        }
+        File modelFile = new File(cliArgs[0]);
         String cp = cli.getOptionValue("classpath", new File(modelFile.getParent(), "classes").getAbsolutePath());
         URLClassLoader classLoader = new URLClassLoader(
                 new URL[]{new File(cp).toURL()}, App.class.getClassLoader()
