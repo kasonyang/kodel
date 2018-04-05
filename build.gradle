@@ -1,6 +1,7 @@
 apply plugin:'java'
 apply plugin:'application'
 apply from : 'gradle/maven-publish.gradle'
+apply from : 'gradle/version.gradle'
 mainClassName='site.kason.kodel.App'
 repositories {
   mavenCentral()
