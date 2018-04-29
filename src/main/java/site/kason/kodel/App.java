@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import kalang.compiler.Configuration;
+import kalang.tool.KalangShell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -69,30 +71,37 @@ public class App {
             System.exit(-1);
         }
         File modelFile = new File(cliArgs[0]);
+        if (!modelFile.exists()){
+            System.err.println("file not found:" + modelFile.getName());
+            System.exit(-2);
+        }
         String cp = cli.getOptionValue("classpath", new File(modelFile.getParent(), "classes").getAbsolutePath());
-        URLClassLoader classLoader = new URLClassLoader(
-                new URL[]{new File(cp).toURL()}, App.class.getClassLoader()
-        );
-        CompilerConfiguration config = new CompilerConfiguration();
-        config.setSourceEncoding("utf-8");
-        //config.setClasspath(cp);
         File appHome = new File(FileUtils.getUserDirectoryPath(), ".kodel");
         String homeClassPath = new File(appHome, "classes").getAbsolutePath();
-        config.getClasspath().add(homeClassPath);
-        //System.out.println(cp);
-        config.setScriptBaseClass(ScriptExecutor.class.getName());
-        GroovyShell shell = new GroovyShell(classLoader, new Binding(), config);
-        ScriptExecutor script = (ScriptExecutor) shell.parse(modelFile);
+        URLClassLoader classLoader = new URLClassLoader(
+                new URL[]{
+                    new File(homeClassPath).toURL(),
+                    new File(cp).toURL()
+                }
+                , App.class.getClassLoader()
+        );
         String outputDir = cli.getOptionValue("out", ".");
+        String templatePath = cli.getOptionValue("templatepath", "templates");
+        String modelFileName = modelFile.getName();
+        ScriptExecutor script;
+        if (modelFileName.endsWith(".kl") || modelFileName.endsWith(".kalang")){
+            script = parseKalang(classLoader,modelFile);
+        } else {
+            script = parseGroovy(classLoader, modelFile);
+        }
         script.outputDir(outputDir);
         String homeTemplatePath = new File(appHome, "templates").getAbsolutePath();
-        String tp = cli.getOptionValue("templatepath", "templates");
         script.addTemplatePath(homeTemplatePath);
-        script.addTemplatePath(tp);
-        script.run();
+        script.addTemplatePath(templatePath);
+        script.executeScript();
         KodelRenderer renderer = new KodelRenderer(classLoader);
-        List<TemplateTask> tasks = script.tasks;
-        Map<String, Object> global = script.global;
+        List<TemplateTask> tasks = script.getTasks();
+        Map<String, Object> global = script.getGlobal();
         List<String> templatePaths = script.getTemplatePaths();
         for (TemplateTask t : tasks) {
             String tpl = t.getTemplate();
@@ -119,6 +128,23 @@ public class App {
         }
         String version = prop.getProperty("version", "UNKNOWN");
         System.out.println(String.format("%s %s", APP_NAME, version));
+    }
+    
+    private static ScriptExecutor parseKalang(ClassLoader classLoader,File modelFile) throws IOException{
+        Configuration config = new Configuration();
+        config.setScriptBaseClass(KalangScriptBase.class.getName());
+        KalangShell shell = new KalangShell(config, classLoader);
+        ScriptExecutor script = (ScriptExecutor) shell.parseScript(modelFile);
+        return script;
+    }
+    
+    private static ScriptExecutor parseGroovy(ClassLoader classLoader,File modelFile) throws CompilationFailedException, IOException{
+        CompilerConfiguration config = new CompilerConfiguration();
+        config.setSourceEncoding("utf-8");
+        config.setScriptBaseClass(GroovyScriptBase.class.getName());
+        GroovyShell shell = new GroovyShell(classLoader, new Binding(), config);
+        GroovyScriptBase script = (GroovyScriptBase) shell.parse(modelFile);
+        return script;
     }
 
 }
