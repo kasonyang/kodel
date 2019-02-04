@@ -11,8 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import kalang.compiler.Configuration;
-import kalang.tool.KalangShell;
+
+import kalang.compiler.compile.Configuration;
+import kalang.compiler.tool.KalangShell;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;

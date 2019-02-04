@@ -1,2 +1,2 @@
-var model = [name:"World"];
+var model = ["name":"World"];
 template(model,"hello.tpr","kalang/World.java");
